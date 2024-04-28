@@ -37,6 +37,14 @@ export const authOptions: NextAuthOptions = {
                     if (!user.isVerified) {
                         throw new Error('please verify your account first before login')
                     }
+                    const isPasswordCorrect = await bcrypt.compare(credentials.password,user.password)
+                    
+                    if (isPasswordCorrect) {
+                        return user
+
+                    }else{
+                        throw new Error('Incorrect password')
+                    }
 
 
                     
@@ -46,5 +54,38 @@ export const authOptions: NextAuthOptions = {
                
             }
         })
-    ]
+
+    ],
+    callbacks: {
+        async jwt({token,user}){
+
+            if (user) {
+                token._id = user._id?.toString()
+                token.isVerified = user.isVerified
+                token.isAcceptingMessage = user.isAcceptingMessage
+                token.username = user.username
+            }
+            return token
+        },
+        async session({session,token}){
+            if (token) {
+                session.user._id =token._id
+                session.user.isVerified = token.isVerified
+                session.user.isAcceptingMessage = token.isAcceptingMessage
+                session.user.username = token.username
+            }
+            return session
+        }
+    },
+    pages: {
+        signIn: '/sign-in',
+        // signOut: '/sign-out',
+        // error: '/error',
+        // verifyRequest: '/verify-request',
+        // newUser: '/new-user',
+    },
+    session:{
+        strategy: "jwt"
+    },
+    secret: process.env.NEXTAUTH_SECRET,
 };
