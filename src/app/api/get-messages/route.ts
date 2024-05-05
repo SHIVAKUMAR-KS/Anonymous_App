@@ -17,7 +17,8 @@ export async function GET(request: Request){
         },
         { status: 401 })
     }
-    const userId = new mongoose.Types.ObjectId(user._id);
+     //const userId = new mongoose.Types.ObjectId(user._id);
+     const userId = new mongoose.Types.ObjectId()
     try {
         const user = await UserModel.aggregate([
             {$match: {id:userId}},
@@ -34,7 +35,7 @@ export async function GET(request: Request){
         }
         return Response.json({
             success: true,
-            messages: user[0].messages
+         messages: user[0].messages
         },
     { status: 200 })
     } catch (error) {
